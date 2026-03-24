@@ -176,6 +176,10 @@ export type OclifConfiguration = {
    */
   helpClass?: string | HelpLocationOptions
   /**
+   * The location of your custom version class.
+   */
+  versionClass?: string | HelpLocationOptions
+  /**
    * Options for the help output.
    */
   helpOptions?: HelpOptions
@@ -247,14 +251,14 @@ export type OclifConfiguration = {
   }
   /**
    * Tar flags configuration for different platforms.
-   * 
+   *
    * {
    *  "tarFlags": {
    *   "win32": "--force-local",
    *   "darwin": "--no-xattrs"
    *  }
    * }
-   * 
+   *
    */
   tarFlags?: {
     [platform: string]: string
