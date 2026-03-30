@@ -1,9 +1,9 @@
 import {readdir, readFile} from 'node:fs/promises'
 import {dirname, join} from 'node:path'
 
-import {memoizedWarn} from '../errors/warn'
 import {TSConfig} from '../interfaces'
 import {makeDebug} from '../logger'
+import {parseJsonc} from './parse-jsonc'
 import {mergeNestedObjects} from './util'
 
 const debug = makeDebug('read-tsconfig')
@@ -35,29 +35,13 @@ async function upUntil(path: string, test: (path: string) => Promise<boolean>): 
 export async function readTSConfig(root: string, tsconfigName = 'tsconfig.json'): Promise<TSConfig | undefined> {
   const found: Record<string, any>[] = []
 
-  let typescript: typeof import('typescript') | undefined
-  try {
-    typescript = require('typescript')
-  } catch {
-    try {
-      typescript = require(root + '/node_modules/typescript')
-    } catch {}
-  }
-
-  if (!typescript) {
-    memoizedWarn(
-      'Could not find typescript. Please ensure that typescript is a devDependency. Falling back to compiled source.',
-    )
-    return
-  }
-
   const read = async (path: string): Promise<unknown> => {
     const localRoot = await upUntil(path, async (p) => (await readdir(p)).includes('package.json'))
     if (!localRoot) return
 
     try {
       const contents = await readFile(path, 'utf8')
-      const parsed = typescript?.parseConfigFileTextToJson(path, contents).config
+      const parsed = parseJsonc(contents) as Record<string, any>
 
       found.push(parsed)
 
